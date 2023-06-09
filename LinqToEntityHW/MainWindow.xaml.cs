@@ -10,11 +10,13 @@ namespace LinqToEntityHW
     /// </summary>
     public partial class MainWindow : Window
     {
-        ObservableCollection<Book> books;
+        public ObservableCollection<Book> books { get; } = new();
 
         public MainWindow()
         {
             InitializeComponent();
+
+            DataContext = this;
         }
 
         private void ComboBox1_SelectionChanged(object sender, RoutedEventArgs e)
@@ -63,45 +65,70 @@ namespace LinqToEntityHW
                 {
                     books.Clear();
 
-                    var choosenBooks = database.Books
-                        .Join(
-                        database.Authors,
-                        b => b.IdAuthor,
-                        a => a.Id,
-                        (b,a) =>
-                        new Book()
-                        {
-                            Id = b.Id,
-                            Name = b.Name,
-                            Pages = b.Pages,
-                            YearPress = b.Pages,
-                            IdThemes = b.IdThemes,
-                            IdCategory = b.IdCategory,
-                            IdAuthor = b.IdAuthor,
-                            IdPress = b.IdPress,
-                            Comment = b.Comment,
-                            Quantity = b.Quantity
-                        })
-                         .ToList();
+                    var selectedAuthor = ComboBox2.SelectedItem as string;
 
-                    choosenBooks.ForEach(b => books.Add(b));
+                    if (selectedAuthor != null)
+                    {
+                        var authorBooks = database.Books
+                            .Join(
+                                database.Authors,
+                                b => b.IdAuthor,
+                                a => a.Id,
+                                (b, a) => new { Book = b, Author = a }
+                            )
+                            .ToList()
+                            .Where(x => $"{x.Author.FirstName} {x.Author.LastName}" == selectedAuthor)
+                            .Select(x => x.Book)
+                            .ToList();
 
+                        authorBooks.ForEach(b => books.Add(b));
+                    }
                 }
-                else if (selectedItem!.Content.ToString() == "Themes")
+                else if (selectedItem.Content.ToString() == "Themes")
                 {
-                    ComboBox2.Items.Clear();
+                    var selectedTheme = ComboBox2.SelectedItem as string;
 
-                    var themes = database.Themes;
+                    if (selectedTheme != null)
+                    {
+                        books.Clear();
 
-                    themes.ToList().ForEach(t => ComboBox2.Items.Add($"{t.Name}"));
+                        var themeBooks = database.Books
+                            .Join(
+                                database.Themes,
+                                b => b.IdThemes,
+                                t => t.Id,
+                                (b, t) => new { Book = b, Theme = t }
+                            )
+                            .ToList()
+                            .Where(x => x.Theme.Name == selectedTheme)
+                            .Select(x => x.Book)
+                            .ToList();
+
+                        themeBooks.ForEach(b => books.Add(b));
+                    }
                 }
-                else if (selectedItem!.Content.ToString() == "Categories")
+                else if (selectedItem.Content.ToString() == "Categories")
                 {
-                    ComboBox2.Items.Clear();
+                    var selectedCategory = ComboBox2.SelectedItem as string;
 
-                    var categories = database.Categories;
+                    if (selectedCategory != null)
+                    {
+                        books.Clear();
 
-                    categories.ToList().ForEach(c => ComboBox2.Items.Add($"{c.Name}"));
+                        var categoryBooks = database.Books
+                            .Join(
+                                database.Categories,
+                                b => b.IdCategory,
+                                c => c.Id,
+                                (b, c) => new { Book = b, Category = c }
+                            )
+                            .ToList()
+                            .Where(x => x.Category.Name == selectedCategory)
+                            .Select(x => x.Book)
+                            .ToList();
+
+                        categoryBooks.ForEach(b => books.Add(b));
+                    }
                 }
 
             }
