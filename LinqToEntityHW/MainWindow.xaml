@@ -23,10 +23,16 @@
                 <ComboBoxItem Content="Themes"/>
                 <ComboBoxItem Content="Categories"/>
             </ComboBox>
-            <ComboBox Name="ComboBox2" Grid.Column="1" Margin="40,16"/>
+            <ComboBox Name="ComboBox2" Grid.Column="1" Margin="40,16" SelectionChanged="ComboBox2_SelectionChanged"/>
         </Grid>
-        <ListView Grid.Row="1" Margin="10">
-            
+        <ListView Grid.Row="1" Margin="10" ItemsSource="{Binding books}">
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Header="Name" Width="120" DisplayMemberBinding="{Binding Name}" />
+                    <GridViewColumn Header="Age" Width="50" DisplayMemberBinding="{Binding Pages}" />
+                    <GridViewColumn Header="Email" Width="200" DisplayMemberBinding="{Binding YearPress}" />
+                </GridView>
+            </ListView.View>
         </ListView>
     </Grid>
 </Window>
